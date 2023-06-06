@@ -1,0 +1,103 @@
+diff --git a/ldm/models/diffusion/ddim.py b/ldm/models/diffusion/ddim.py
+index fb31215..5246599 100644
+--- a/ldm/models/diffusion/ddim.py
++++ b/ldm/models/diffusion/ddim.py
+@@ -18,7 +18,7 @@ class DDIMSampler(object):
+ 
+     def register_buffer(self, name, attr):
+         if type(attr) == torch.Tensor:
+-            if attr.device != torch.device("cuda"):
++            if torch.cuda.is_available() and attr.device != torch.device("cuda"):
+                 attr = attr.to(torch.device("cuda"))
+         setattr(self, name, attr)
+ 
+diff --git a/ldm/models/diffusion/plms.py b/ldm/models/diffusion/plms.py
+index 78eeb10..fc7a52f 100644
+--- a/ldm/models/diffusion/plms.py
++++ b/ldm/models/diffusion/plms.py
+@@ -17,7 +17,7 @@ class PLMSSampler(object):
+ 
+     def register_buffer(self, name, attr):
+         if type(attr) == torch.Tensor:
+-            if attr.device != torch.device("cuda"):
++            if torch.cuda.is_available() and attr.device != torch.device("cuda"):
+                 attr = attr.to(torch.device("cuda"))
+         setattr(self, name, attr)
+ 
+diff --git a/ldm/modules/encoders/modules.py b/ldm/modules/encoders/modules.py
+index ededbe4..e598e3a 100644
+--- a/ldm/modules/encoders/modules.py
++++ b/ldm/modules/encoders/modules.py
+@@ -35,7 +35,7 @@ class ClassEmbedder(nn.Module):
+ 
+ class TransformerEmbedder(AbstractEncoder):
+     """Some transformer encoder layers"""
+-    def __init__(self, n_embed, n_layer, vocab_size, max_seq_len=77, device="cuda"):
++    def __init__(self, n_embed, n_layer, vocab_size, max_seq_len=77, device='cuda' if torch.cuda.is_available() else 'cpu'):
+         super().__init__()
+         self.device = device
+         self.transformer = TransformerWrapper(num_tokens=vocab_size, max_seq_len=max_seq_len,
+@@ -52,7 +52,7 @@ class TransformerEmbedder(AbstractEncoder):
+ 
+ class BERTTokenizer(AbstractEncoder):
+     """ Uses a pretrained BERT tokenizer by huggingface. Vocab size: 30522 (?)"""
+-    def __init__(self, device="cuda", vq_interface=True, max_length=77):
++    def __init__(self, device='cuda' if torch.cuda.is_available() else 'cpu', vq_interface=True, max_length=77):
+         super().__init__()
+         from transformers import BertTokenizerFast  # TODO: add to reuquirements
+         self.tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
+@@ -80,7 +80,7 @@ class BERTTokenizer(AbstractEncoder):
+ class BERTEmbedder(AbstractEncoder):
+     """Uses the BERT tokenizr model and add some transformer encoder layers"""
+     def __init__(self, n_embed, n_layer, vocab_size=30522, max_seq_len=77,
+-                 device="cuda",use_tokenizer=True, embedding_dropout=0.0):
++                 device='cuda' if torch.cuda.is_available() else 'cpu', use_tokenizer=True, embedding_dropout=0.0):
+         super().__init__()
+         self.use_tknz_fn = use_tokenizer
+         if self.use_tknz_fn:
+@@ -136,7 +136,7 @@ class SpatialRescaler(nn.Module):
+ 
+ class FrozenCLIPEmbedder(AbstractEncoder):
+     """Uses the CLIP transformer encoder for text (from Hugging Face)"""
+-    def __init__(self, version="openai/clip-vit-large-patch14", device="cuda", max_length=77):
++    def __init__(self, version="openai/clip-vit-large-patch14", device='cuda' if torch.cuda.is_available() else 'cpu', max_length=77):
+         super().__init__()
+         self.tokenizer = CLIPTokenizer.from_pretrained(version)
+         self.transformer = CLIPTextModel.from_pretrained(version)
+@@ -166,7 +166,7 @@ class FrozenCLIPTextEmbedder(nn.Module):
+     """
+     Uses the CLIP transformer encoder for text.
+     """
+-    def __init__(self, version='ViT-L/14', device="cuda", max_length=77, n_repeat=1, normalize=True):
++    def __init__(self, version='ViT-L/14', device='cuda' if torch.cuda.is_available() else 'cpu', max_length=77, n_repeat=1, normalize=True):
+         super().__init__()
+         self.model, _ = clip.load(version, jit=False, device="cpu")
+         self.device = device
+diff --git a/scripts/img2img.py b/scripts/img2img.py
+index 421e215..285fef7 100644
+--- a/scripts/img2img.py
++++ b/scripts/img2img.py
+@@ -40,7 +40,8 @@ def load_model_from_config(config, ckpt, verbose=False):
+         print("unexpected keys:")
+         print(u)
+ 
+-    model.cuda()
++    if torch.cuda.is_available():
++        model.cuda()
+     model.eval()
+     return model
+ 
+diff --git a/scripts/txt2img.py b/scripts/txt2img.py
+index bc38640..04595b8 100644
+--- a/scripts/txt2img.py
++++ b/scripts/txt2img.py
+@@ -61,7 +61,8 @@ def load_model_from_config(config, ckpt, verbose=False):
+         print("unexpected keys:")
+         print(u)
+ 
+-    model.cuda()
++    if torch.cuda.is_available():
++        model.cuda()
+     model.eval()
+     return model
+ 

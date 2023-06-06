@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+set -e
+
+GH_REPO="$1"
+COMMIT="$2"
+OUT_DIR="$3"
+
+GH_BASE_URL="https://github.com/${GH_REPO}"
+TMP_ARCHIVE="/tmp/${COMMIT}.tar.gz"
+
+GH_LATEST_REL="$(curl -Ls -o /dev/null -w %{url_effective} "$GH_BASE_URL/releases/latest")"
+GH_LATEST_TAG="$(echo "$GH_LATEST_REL" | sed -E "s|^.*/tag/(.*)$|\1|")"
+
+curl -L -o "$TMP_ARCHIVE" "${GH_BASE_URL}/archive/${COMMIT}.tar.gz"
+
+mkdir -p "$OUT_DIR"
+tar -xf "$TMP_ARCHIVE" --directory "$OUT_DIR" --strip-components=1
+rm "$TMP_ARCHIVE"

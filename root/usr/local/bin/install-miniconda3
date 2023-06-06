@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+set -e
+
+CONDA_VERSION="$1"
+CONDA_SHA256="$2"
+CONDA_DIR="$3"
+
+INSTALLER=/tmp/miniconda3.sh
+
+curl -L -o "${INSTALLER}" "https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh"
+echo "${CONDA_SHA256} ${INSTALLER}" | sha256sum -c
+bash "${INSTALLER}" -f -b -p "$CONDA_DIR"
+rm "${INSTALLER}"
+
+export PATH="${CONDA_DIR}/bin:${PATH}"
+
+conda update --all --yes
+conda config --set auto_update_conda False
