@@ -7,7 +7,7 @@ ARG CONDA_VERSION="py310_23.3.1-0"
 ARG CONDA_SHA256="aef279d6baea7f67940f16aad17ebe5f6aac97487c7c03466ff01f4819e5a651"
 ARG CONDA_DIR="/opt/conda"
 
-COPY root /
+COPY scripts /usr/local/bin
 
 ENV DEBIAN_FRONTEND=noninteractive
 

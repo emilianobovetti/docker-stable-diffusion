@@ -12,7 +12,8 @@ x-nvidia: &nvidia
 services:
   compvis:
     build:
-      context: "$PWD/compvis"
+      context: "$PWD"
+      dockerfile: "$PWD/compvis/Dockerfile"
       args:
         UID: ${UID:-1000}
         GID: ${GID:-1000}
