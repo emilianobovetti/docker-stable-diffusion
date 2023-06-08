@@ -15,23 +15,23 @@ unset __conda_setup
 
 STABLE_DIFFUSION_DIR="${HOME}/stable-diffusion"
 
-STABLE_DIFFUSION_MODEL_DIR="${STABLE_DIFFUSION_DIR}/models/ldm/stable-diffusion-v1"
-STABLE_DIFFUSION_MODEL_PATH="${STABLE_DIFFUSION_MODEL_DIR}/model.ckpt"
+MODEL_DIR="${STABLE_DIFFUSION_DIR}/models/ldm/stable-diffusion-v1"
+MODEL_PATH="${MODEL_DIR}/model.ckpt"
 
 if [ ! -d "${STABLE_DIFFUSION_DIR}" ]; then
-  gh-fetch-by-commit "${STABLE_DIFFUSION_GH_REPO}" "${STABLE_DIFFUSION_COMMIT_HASH}" "${STABLE_DIFFUSION_DIR}"
+  gh-fetch-by-commit "${GH_REPO}" "${COMMIT_HASH}" "${STABLE_DIFFUSION_DIR}"
   git apply "${HOME}/stable-diffusion-cpu.patch"
 fi
 
-if [ "$(cat "${STABLE_DIFFUSION_MODEL_DIR}/sha256sum")" != "${STABLE_DIFFUSION_MODEL_SHA256}" ]; then
-  mkdir -p "${STABLE_DIFFUSION_MODEL_DIR}"
-  rm -f "${STABLE_DIFFUSION_MODEL_PATH}"
-  curl -L -o "${STABLE_DIFFUSION_MODEL_PATH}" "${STABLE_DIFFUSION_MODEL_URL}"
+if [ "$(cat "${MODEL_DIR}/sha256sum")" != "${MODEL_SHA256}" ]; then
+  mkdir -p "${MODEL_DIR}"
+  rm -f "${MODEL_PATH}"
+  curl -L -o "${MODEL_PATH}" "${MODEL_URL}"
 
-  if echo "${STABLE_DIFFUSION_MODEL_SHA256} ${STABLE_DIFFUSION_MODEL_PATH}" | sha256sum -c; then
-    echo "${STABLE_DIFFUSION_MODEL_SHA256}" > "${STABLE_DIFFUSION_MODEL_DIR}/sha256sum"
+  if echo "${MODEL_SHA256} ${MODEL_PATH}" | sha256sum -c; then
+    echo "${MODEL_SHA256}" > "${MODEL_DIR}/sha256sum"
   else
-    rm -f "${STABLE_DIFFUSION_MODEL_PATH}"
+    rm -f "${MODEL_PATH}"
   fi
 fi
 
