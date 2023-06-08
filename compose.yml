@@ -1,29 +1,26 @@
 version: "3"
 
-x-commons: &commons
-  build:
-    context: "$PWD"
-    args:
-      UID: ${UID:-1000}
-      GID: ${GID:-1000}
-  volumes:
-    - "$PWD/home:/home/app"
-  environment:
-    STABLE_DIFFUSION_GH_REPO: CompVis/stable-diffusion
-    STABLE_DIFFUSION_COMMIT_HASH: 21f890f9da3cfbeaba8e2ac3c425ee9e998d5229
-    STABLE_DIFFUSION_MODEL_URL: https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt
-    STABLE_DIFFUSION_MODEL_SHA256: fe4efff1e174c627256e44ec2991ba279b3816e364b49f9be2abc0b3ff3f8556
+x-nvidia: &nvidia
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
 
 services:
-  cpu:
-    <<: *commons
-
-  nvidia:
-    <<: *commons
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+  compvis:
+    build:
+      context: "$PWD/compvis"
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    volumes:
+      - "$PWD/compvis/home:/home/app"
+    environment:
+      STABLE_DIFFUSION_GH_REPO: CompVis/stable-diffusion
+      STABLE_DIFFUSION_COMMIT_HASH: 21f890f9da3cfbeaba8e2ac3c425ee9e998d5229
+      STABLE_DIFFUSION_MODEL_URL: https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt
+      STABLE_DIFFUSION_MODEL_SHA256: fe4efff1e174c627256e44ec2991ba279b3816e364b49f9be2abc0b3ff3f8556
+    # <<: *nvidia
