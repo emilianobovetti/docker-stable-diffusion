@@ -12,7 +12,7 @@ COPY root /
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN addgroup --system --gid "$GID" app && \
-  adduser --system --uid "$UID" --gid "$GID" app && \
+  adduser --system --home /home/app --uid "$UID" --gid "$GID" app && \
   chown -R app:app /home/app && \
   apt-get update && \
   apt-get install -y curl python3 git libglib2.0-0 libsm6 libxrender1 && \
